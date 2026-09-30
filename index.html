@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ComicCraft – AI Comic Story Creator</title>
+<meta name="description" content="Turn a story idea into an illustrated comic, written and drawn by Gemini AI models.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #fbf6e6;
+    --ink: #1b1a2e;
+    --cyan: #27b5d6;
+    --magenta: #e8468c;
+    --yellow: #ffd83d;
+    --panel: #ffffff;
+    --display: "Bowlby One", "Arial Black", Impact, sans-serif;
+    --body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: var(--body);
+    font-size: 1.05rem;
+    line-height: 1.5;
+    color: var(--ink);
+    background-color: var(--paper);
+    background-image: radial-gradient(rgba(39,181,214,.28) 1.2px, transparent 1.4px);
+    background-size: 14px 14px;
+  }
+  a { color: inherit; }
+  :focus-visible { outline: 3px solid var(--magenta); outline-offset: 3px; }
+
+  /* ---------- Header ---------- */
+  .masthead {
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    padding: 1rem clamp(1rem, 4vw, 3rem);
+    border-bottom: 5px solid var(--ink);
+    background: var(--yellow);
+  }
+  .logo { font-family: var(--display); font-size: 1.6rem; letter-spacing: .01em; text-decoration: none; }
+  .logo span { color: var(--magenta); -webkit-text-stroke: 2px var(--ink); paint-order: stroke fill; }
+  .masthead nav { display: flex; gap: 1.25rem; font-weight: 700; }
+  .masthead nav a { text-decoration: none; }
+  .masthead nav a:hover { text-decoration: underline; text-decoration-thickness: 3px; }
+
+  /* ---------- Layout ---------- */
+  main {
+    display: grid;
+    grid-template-columns: minmax(280px, 380px) 1fr;
+    gap: clamp(1.25rem, 3vw, 2.5rem);
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: clamp(1.25rem, 3vw, 2.5rem) clamp(1rem, 4vw, 3rem) 4rem;
+    align-items: start;
+  }
+  @media (max-width: 860px) { main { grid-template-columns: 1fr; } }
+
+  /* ---------- Form ---------- */
+  .studio {
+    position: sticky; top: 1rem;
+    background: var(--panel);
+    border: 4px solid var(--ink);
+    border-radius: 6px;
+    box-shadow: 8px 8px 0 var(--ink);
+    padding: 1.5rem;
+  }
+  @media (max-width: 860px) { .studio { position: static; } }
+  .studio h1 { font-family: var(--display); font-size: 1.9rem; line-height: 1.1; margin: 0 0 .5rem; }
+  .studio > p { margin: 0 0 1.25rem; }
+  label { display: block; font-weight: 700; margin: 1rem 0 .3rem; }
+  textarea, select, input[type=range] { width: 100%; font: inherit; color: inherit; }
+  textarea, select {
+    padding: .65rem .75rem;
+    border: 3px solid var(--ink);
+    border-radius: 4px;
+    background: var(--paper);
+  }
+  textarea { min-height: 7.5rem; resize: vertical; }
+  .hint { font-size: .9rem; opacity: .75; margin-top: .25rem; }
+  input[type=range] { accent-color: var(--magenta); }
+  .count { float: right; font-family: var(--display); }
+  button.go {
+    width: 100%; margin-top: 1.4rem;
+    padding: .9rem 1rem;
+    font: 1.25rem/1 var(--display);
+    color: var(--ink);
+    background: var(--magenta);
+    border: 4px solid var(--ink);
+    border-radius: 4px;
+    box-shadow: 5px 5px 0 var(--ink);
+    cursor: pointer;
+    transition: transform .08s, box-shadow .08s;
+  }
+  button.go:hover:not(:disabled) { transform: translate(-2px,-2px); box-shadow: 7px 7px 0 var(--ink); }
+  button.go:active:not(:disabled) { transform: translate(4px,4px); box-shadow: 1px 1px 0 var(--ink); }
+  button.go:disabled { background: #cfc9b4; cursor: wait; }
+
+  /* ---------- Comic page ---------- */
+  .page-head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: .75rem; margin-bottom: 1rem; }
+  .page-head h2 { font-family: var(--display); font-size: clamp(1.6rem, 3.5vw, 2.6rem); line-height: 1.1; margin: 0; }
+  .tools { display: flex; gap: .5rem; }
+  .tools button {
+    font: inherit; font-weight: 700; padding: .45rem .9rem;
+    background: var(--panel); border: 3px solid var(--ink); border-radius: 4px; cursor: pointer;
+  }
+  .tools button:hover { background: var(--yellow); }
+
+  .comic {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    padding: 14px;
+    background: var(--ink);
+    border-radius: 6px;
+  }
+  @media (max-width: 560px) { .comic { grid-template-columns: 1fr; } }
+  .cell {
+    position: relative;
+    display: flex; flex-direction: column; justify-content: space-between;
+    min-height: 280px;
+    background: var(--panel);
+    overflow: hidden;
+  }
+  .cell:first-child { grid-column: 1 / -1; min-height: 340px; }
+  .cell img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .cell.empty {
+    background-image: radial-gradient(var(--magenta) 2px, transparent 2.4px);
+    background-size: 12px 12px;
+    background-color: #fff;
+    align-items: center; justify-content: center;
+    font-family: var(--display); font-size: 2.2rem; color: var(--ink); opacity: .9;
+  }
+  .cell.empty span { background: var(--yellow); border: 3px solid var(--ink); padding: .1rem .7rem; }
+  .caption, .bubble { position: relative; z-index: 1; margin: 10px; }
+  .caption {
+    align-self: flex-start;
+    max-width: 85%;
+    padding: .35rem .65rem;
+    background: var(--yellow);
+    border: 3px solid var(--ink);
+    font-weight: 700; font-size: .95rem;
+  }
+  .bubble {
+    align-self: flex-end;
+    max-width: 80%;
+    padding: .6rem .9rem;
+    background: #fff;
+    border: 3px solid var(--ink);
+    border-radius: 22px;
+    font-weight: 700;
+  }
+
+  .cell.loading::after {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(100deg, transparent 30%, rgba(255,216,61,.55) 50%, transparent 70%);
+    background-size: 250% 100%;
+    animation: sweep 1.2s linear infinite;
+  }
+  @keyframes sweep { from { background-position: 150% 0; } to { background-position: -100% 0; } }
+  @media (prefers-reduced-motion: reduce) {
+    .cell.loading::after { animation: none; }
+    button.go { transition: none; }
+    html { scroll-behavior: auto; }
+  }
+
+  .status { margin-top: 1rem; font-weight: 700; min-height: 1.6rem; }
+  .status.error { color: #a4123f; background: #fff; border: 3px solid #a4123f; padding: .6rem .8rem; border-radius: 4px; }
+
+  /* ---------- About ---------- */
+  .about { grid-column: 1 / -1; margin-top: 2rem; }
+  .about h2 { font-family: var(--display); font-size: 1.8rem; margin: 0 0 1rem; }
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1rem; list-style: none; padding: 0; margin: 0; counter-reset: s; }
+  .steps li {
+    counter-increment: s;
+    background: var(--panel); border: 4px solid var(--ink); padding: 1rem 1rem 1.1rem;
+  }
+  .steps li::before {
+    content: counter(s);
+    display: inline-grid; place-items: center; width: 2rem; height: 2rem; margin-bottom: .5rem;
+    font-family: var(--display); background: var(--cyan); border: 3px solid var(--ink); border-radius: 50%;
+  }
+  .steps strong { display: block; }
+  footer { text-align: center; padding: 1.5rem 1rem 2.5rem; border-top: 5px solid var(--ink); background: var(--yellow); font-weight: 700; }
+
+  @media print {
+    body { background: #fff; }
+    .masthead, .studio, .tools, .about, footer, .status { display: none; }
+    main { display: block; padding: 0; }
+  }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <a class="logo" href="#top">Comic<span>Craft</span></a>
+  <nav aria-label="Main">
+    <a href="#studio">Create</a>
+    <a href="#how">How it works</a>
+    <a href="/docs">API docs</a>
+  </nav>
+</header>
+
+<main id="top">
+  <section class="studio" id="studio" aria-labelledby="studio-title">
+    <h1 id="studio-title">Write your comic</h1>
+    <p>Describe a story and the AI will script and draw it panel by panel.</p>
+
+    <form id="form" novalidate>
+      <label for="prompt">Story idea</label>
+      <textarea id="prompt" name="prompt" maxlength="600" required
+        placeholder="A shy robot barista discovers her espresso machine can predict the future."></textarea>
+      <div class="hint">Name the hero, the place and the problem.</div>
+
+      <label for="genre">Genre</label>
+      <select id="genre" name="genre">
+        <option>Adventure</option>
+        <option>Comedy</option>
+        <option>Sci-fi</option>
+        <option>Fantasy</option>
+        <option>Mystery</option>
+        <option>Superhero</option>
+        <option>Slice of life</option>
+      </select>
+
+      <label for="style">Art style</label>
+      <select id="style" name="style">
+        <option>Classic comic book</option>
+        <option>Manga</option>
+        <option>Watercolor storybook</option>
+        <option>Retro pulp</option>
+        <option>Flat vector</option>
+        <option>Noir ink</option>
+      </select>
+
+      <label for="panels">Panels <span class="count" id="panelsOut">4</span></label>
+      <input type="range" id="panels" name="panels" min="2" max="8" value="4">
+
+      <button class="go" id="go" type="submit">Create comic</button>
+    </form>
+  </section>
+
+  <section aria-labelledby="page-title">
+    <div class="page-head">
+      <h2 id="page-title">Your comic will appear here</h2>
+      <div class="tools" id="tools" hidden>
+        <button type="button" id="print">Print</button>
+        <button type="button" id="save">Save as JSON</button>
+      </div>
+    </div>
+    <div class="comic" id="comic" aria-live="polite"></div>
+    <div class="status" id="status" role="status"></div>
+  </section>
+
+  <section class="about" id="how" aria-labelledby="how-title">
+    <h2 id="how-title">How it works</h2>
+    <ol class="steps">
+      <li><strong>You write the idea</strong>Pick a genre, an art style and how many panels you want.</li>
+      <li><strong>Gemini writes the script</strong>A text model breaks your story into panels with captions and dialogue.</li>
+      <li><strong>Gemini draws each panel</strong>An image model illustrates every scene in the style you chose.</li>
+      <li><strong>You get a finished page</strong>Print it or save the story to keep working on it.</li>
+    </ol>
+  </section>
+</main>
+
+<footer>ComicCraft · built with FastAPI and Google Gemini</footer>
+
+<script>
+  /* ====== Configuration ======
+     Change API_URL to match your FastAPI route.
+     Expected request  (POST, JSON): { prompt, genre, style, panels }
+     Expected response (JSON): { title: string,
+                                 panels: [{ caption, dialogue, image }] }
+     "image" may be a full URL, a data: URL, or raw base64 PNG.          */
+  const API_URL = "/api/generate";
+
+  const $ = (id) => document.getElementById(id);
+  const form = $("form"), comic = $("comic"), statusEl = $("status"),
+        go = $("go"), title = $("page-title"), tools = $("tools");
+  let lastStory = null;
+
+  const DEFAULT_TITLE = "Your comic will appear here";
+
+  function showPlaceholders(n, loading) {
+    comic.innerHTML = "";
+    for (let i = 1; i <= n; i++) {
+      const c = document.createElement("div");
+      c.className = "cell " + (loading ? "loading" : "empty");
+      if (!loading) c.innerHTML = "<span>" + i + "</span>";
+      comic.appendChild(c);
+    }
+  }
+
+  function setStatus(msg, isError) {
+    statusEl.textContent = msg || "";
+    statusEl.className = "status" + (isError ? " error" : "");
+  }
+
+  function imgSrc(v) {
+    if (!v) return "";
+    if (/^(data:|https?:|\/)/.test(v)) return v;
+    return "data:image/png;base64," + v;
+  }
+
+  function renderStory(story) {
+    title.textContent = story.title || "Untitled comic";
+    comic.innerHTML = "";
+    (story.panels || []).forEach((p, i) => {
+      const cell = document.createElement("figure");
+      cell.className = "cell";
+      cell.style.margin = "0";
+      if (p.image) {
+        const img = document.createElement("img");
+        img.src = imgSrc(p.image);
+        img.alt = p.caption || "Comic panel " + (i + 1);
+        cell.appendChild(img);
+      }
+      const cap = document.createElement("div");
+      cap.className = "caption";
+      cap.textContent = p.caption || "";
+      if (!p.caption) cap.hidden = true;
+      const bub = document.createElement("div");
+      bub.className = "bubble";
+      bub.textContent = p.dialogue || "";
+      if (!p.dialogue) bub.hidden = true;
+      cell.append(cap, bub);
+      comic.appendChild(cell);
+    });
+    tools.hidden = false;
+  }
+
+  $("panels").addEventListener("input", (e) => { $("panelsOut").textContent = e.target.value; });
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const prompt = $("prompt").value.trim();
+    if (prompt.length < 10) {
+      setStatus("Add a little more detail so the story has something to work with.", true);
+      $("prompt").focus();
+      return;
+    }
+    const body = {
+      prompt,
+      genre: $("genre").value,
+      style: $("style").value,
+      panels: Number($("panels").value)
+    };
+
+    go.disabled = true;
+    go.textContent = "Drawing…";
+    tools.hidden = true;
+    title.textContent = "Drawing your comic…";
+    showPlaceholders(body.panels, true);
+    setStatus("This can take up to a minute while each panel is illustrated.");
+
+    try {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
+      if (!res.ok) {
+        let detail = "";
+        try { detail = (await res.json()).detail || ""; } catch (_) {}
+        throw new Error(detail || "The server returned " + res.status + ".");
+      }
+      lastStory = await res.json();
+      renderStory(lastStory);
+      setStatus("");
+    } catch (err) {
+      title.textContent = DEFAULT_TITLE;
+      showPlaceholders(body.panels, false);
+      setStatus("Couldn't create the comic. " + err.message + " Check that the API is running and try again.", true);
+    } finally {
+      go.disabled = false;
+      go.textContent = "Create comic";
+    }
+  });
+
+  $("print").addEventListener("click", () => window.print());
+
+  $("save").addEventListener("click", () => {
+    if (!lastStory) return;
+    const blob = new Blob([JSON.stringify(lastStory, null, 2)], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = (lastStory.title || "comic").replace(/[^\w-]+/g, "_") + ".json";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+
+  showPlaceholders(4, false);
+</script>
+</body>
+</html>
