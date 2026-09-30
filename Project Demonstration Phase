@@ -1,0 +1,14 @@
+Suggested 7-minute demo flow
+
+Intro (1 min): the problem and your solution
+Live demo (3 min): enter a prompt such as "A shy robot barista discovers her espresso machine can predict the future," choose Comedy and Manga, set 4 panels, show the loading state, then the finished comic
+Features (1 min): try a different style, print preview, save JSON
+Tech walkthrough (1 min): architecture diagram, where Gemini is called, and the FastAPI /docs page
+Wrap-up (1 min): challenges, learnings and future scope
+
+Demo tips
+
+Pre-generate one comic as a backup in case of slow internet or API limits
+Use a short, vivid prompt with a clear hero and conflict
+Keep the terminal open to show the backend logs
+Prepare answers for likely questions: "How do you keep characters consistent?", "How much does each comic cost?", "How do you handle unsafe prompts?"
