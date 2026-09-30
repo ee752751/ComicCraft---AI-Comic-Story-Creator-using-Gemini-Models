@@ -1,0 +1,10 @@
+Documents to produce
+
+README: overview, features, screenshots, installation, .env setup, how to run (uvicorn main:app --reload)
+API documentation: endpoint, request and response schemas, error codes (FastAPI /docs covers much of this)
+Design document: architecture diagram, UI choices, color and font rationale
+User guide: how to write a good prompt ("name the hero, the place and the problem"), what each option does
+Test report: test cases, results, known issues
+Final report: problem statement, objectives, methodology, results, limitations, future scope
+
+Future scope to include: character consistency across panels, editing or regenerating a single panel, speech-bubble placement, PDF export, user accounts with a saved gallery, and multiple languages.
