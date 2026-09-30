@@ -1,0 +1,20 @@
+Suggested 4-week plan
+
+Week	Goals
+1	Finalize requirements, design UI, set up the FastAPI project and Gemini API access
+2	Build the script-generation endpoint, then image generation
+3	Connect frontend to backend, add error handling, print and save features
+4	Testing, bug fixes, documentation, demo preparation
+
+Roles (for a team): frontend developer, backend and AI developer, tester and documenter. A solo developer covers all three.
+
+Tools: VS Code, Git/GitHub, Postman or the /docs page for API testing, and a .env file for the API key.
+
+Risks and mitigations
+
+Risk	Mitigation
+Slow image generation	Generate panels in parallel, show loading shimmer, cap panels at 8
+API quota or cost	Rate-limit per user, cache results
+Malformed AI output	Validate JSON with Pydantic and retry once
+Inconsistent characters	Repeat a fixed character description in every image prompt
+Unsafe content	Use safety settings and input filtering
