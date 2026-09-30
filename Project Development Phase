@@ -1,0 +1,37 @@
+Frontend (mostly done)
+
+Form with validation (minimum 10 characters) and a live panel counter
+Loading placeholders, error state and a rendered comic grid
+Print stylesheet and "Save as JSON" button
+
+Backend (to build)
+
+Set up FastAPI, CORS and environment variables for the API key.
+Define Pydantic models for the request (prompt, genre, style, panels) and response.
+Script step: prompt the Gemini text model, for example: "Write a {panels}-panel {genre} comic. Return only JSON with title and panels [{caption, dialogue, image_prompt}]."
+Image step: for each panel, call the Gemini image model with image_prompt plus the art style. Run these concurrently with asyncio.gather.
+Convert images to base64 and return {title, panels}.
+Add error handling that returns readable detail messages.
+
+Minimal skeleton
+
+python
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel, Field
+
+app = FastAPI()
+
+class Req(BaseModel):
+    prompt: str = Field(min_length=10, max_length=600)
+    genre: str
+    style: str
+    panels: int = Field(ge=2, le=8)
+
+@app.post("/api/generate")
+async def generate(req: Req):
+    script = await make_script(req)          # Gemini text
+    images = await make_images(script, req)  # Gemini image, parallel
+    return {"title": script["title"],
+            "panels": [{**p, "image": img} for p, img in zip(script["panels"], images)]}
+
+Best practices: keep secrets in .env, serve the HTML from FastAPI's static files so /api/generate is same-origin, and commit often.
