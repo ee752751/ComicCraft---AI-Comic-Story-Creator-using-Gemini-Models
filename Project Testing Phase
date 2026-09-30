@@ -1,0 +1,24 @@
+Functional tests
+
+Test	Expected result
+Submit with under 10 characters	Friendly validation message, no request sent
+Panels slider at 2 and 8	Correct number of panels rendered
+Each genre and style	Request succeeds and output matches the choices
+Print button	Only the comic appears (controls hidden)
+Save as JSON	Valid file downloads with a sanitized filename
+
+API tests
+
+Valid request returns 200 with a title and the requested number of panels
+Invalid input returns 422
+Gemini failure or timeout returns a clear error, and the UI shows it and restores the placeholders
+
+Non-functional tests
+
+Responsive: check at 360px, 768px and 1280px widths
+Accessibility: keyboard-only navigation, screen reader announcements, contrast
+Performance: measure generation time for 2, 4 and 8 panels
+Browsers: Chrome, Firefox, Safari, Edge
+Security: confirm the API key never appears in browser network calls, and check prompt-injection and inappropriate-content handling
+
+Bug tracking: log issues in a simple table (ID, description, severity, status) or GitHub Issues.
