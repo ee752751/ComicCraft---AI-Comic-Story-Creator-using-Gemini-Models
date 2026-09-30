@@ -1,0 +1,24 @@
+Functional requirements
+
+Accept a story idea (10–600 characters) plus genre, style and panel count (2–8)
+Generate a title and a per-panel caption and dialogue
+Generate one image per panel in the chosen style
+Show loading placeholders while generating and a clear error message on failure
+Print the comic and export it as JSON
+
+Non-functional requirements
+
+Responsive layout (desktop and mobile)
+Accessible: labelled form fields, aria-live updates, focus outlines, reduced-motion support, alt text on images
+Acceptable wait time (the UI warns it can take up to a minute)
+API key kept on the server, never in the browser
+
+Technical requirements
+
+Area	Choice
+Frontend	HTML, CSS, vanilla JavaScript
+Backend	Python, FastAPI
+AI	Google Gemini (text model for script, image model for art)
+Hosting	Any server that can run Uvicorn, such as Render, Railway or a VPS
+
+Constraints: API rate limits and cost per image, image consistency across panels, and content safety filtering.
