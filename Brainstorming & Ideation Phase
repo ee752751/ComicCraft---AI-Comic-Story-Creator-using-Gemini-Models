@@ -1,0 +1,15 @@
+Problem: Many people have story ideas but lack the drawing or writing skills to turn them into visuals. Commissioning artwork is slow and costly.
+
+Idea: A web app where the user types a short story idea, picks a genre, art style and panel count, and gets a finished illustrated comic page.
+
+Target users: students, hobbyist writers, teachers making visual stories, and content creators who want quick storyboards.
+
+Ideas considered:
+
+Text-only story generator (rejected: not visual enough)
+Single-image generator (rejected: no narrative)
+Multi-panel comic with captions and dialogue (chosen)
+
+Unique value: one prompt produces script, dialogue and art, with control over genre and style (Manga, Noir ink, Watercolor, etc.).
+
+Expected outcome: a comic of 2–8 panels that can be printed or saved as JSON.
