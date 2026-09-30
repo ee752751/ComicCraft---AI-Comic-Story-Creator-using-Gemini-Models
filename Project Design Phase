@@ -1,0 +1,31 @@
+Architecture
+
+Browser (index.html)
+   │  POST /api/generate {prompt, genre, style, panels}
+   ▼
+FastAPI backend
+   ├─ 1. Gemini text model → JSON script (title + panels)
+   ├─ 2. Gemini image model → one image per panel (run in parallel)
+   └─ 3. Return {title, panels:[{caption, dialogue, image}]}
+   ▼
+Browser renders comic grid
+
+API design
+
+POST /api/generate accepts the request body above and returns the story JSON
+Errors return { "detail": "..." } with an HTTP error code (the frontend already reads detail)
+/docs is the auto-generated FastAPI documentation, already linked in the navbar
+
+UI/UX design
+
+Comic-book theme: halftone dots, bold outlines, offset shadows
+Fonts: Bowlby One for headings, Atkinson Hyperlegible for body text
+Palette: cyan, magenta and yellow on a paper background
+Layout: sticky form on the left, comic page on the right, collapsing to one column on small screens
+The first panel spans the full width as an "establishing shot"
+
+Design decisions
+
+Prompt the text model to return strict JSON so the backend can parse it reliably
+Reuse one shared character and style description in every image prompt to keep panels consistent
+Images returned as base64 or URLs (the frontend accepts both)
